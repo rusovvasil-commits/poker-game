@@ -102,19 +102,20 @@ function svgCard({ r, s }) {
   const suitSymbol = { c: '♣', d: '♦', h: '♥', s: '♠' }[s];
   const color = (s === 'd' || s === 'h') ? '#cc1e2c' : '#1a1a1a';
 
-  // SVG масштабується під контейнер .pkr-card (80x120 у CSS)
+ function svgCard({ r, s }) {
+  const suitSymbol = { c: '♣', d: '♦', h: '♥', s: '♠' }[s];
+  const color = (s === 'd' || s === 'h') ? '#cc1e2c' : '#1a1a1a';
+
   return `
   <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-label="${r}${s}">
     <rect x="3" y="3" width="194" height="294" rx="16" ry="16"
           fill="#ffffff" stroke="rgba(0,0,0,.25)" />
-    <!-- кути -->
     <g fill="${color}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
       <text x="16" y="32" font-size="28">${r}${suitSymbol}</text>
       <g transform="rotate(180 100 150)">
         <text x="16" y="32" font-size="28">${r}${suitSymbol}</text>
       </g>
     </g>
-    <!-- велика масть по центру -->
     <text x="100" y="172" text-anchor="middle" fill="${color}"
           font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
           font-size="96" opacity=".9">${suitSymbol}</text>
