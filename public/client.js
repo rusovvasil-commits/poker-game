@@ -96,42 +96,27 @@ function renderSeats(t){
     seats.appendChild(d);
   });
 }
-// ===== Helpers для SVG-карт =====
-const PKR_SUIT = { c: '♣', d: '♦', h: '♥', s: '♠' };
-const PKR_COLOR = s => (s==='d'||s==='h') ? '#cc1e2c' : '#1a1a1a';
+function svgCard({ r, s }) {
+  // r: 'A','K','Q','J','T','9'..'2'
+  // s: 'c','d','h','s'
+  const suitSymbol = { c: '♣', d: '♦', h: '♥', s: '♠' }[s];
+  const color = (s === 'd' || s === 'h') ? '#cc1e2c' : '#1a1a1a';
 
-function svgCard({r, s}) {
-  const col = PKR_COLOR(s);
-  const suit = PKR_SUIT[s];
+  // SVG масштабується під контейнер .pkr-card (80x120 у CSS)
   return `
-  <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="194" height="294" rx="16" ry="16" fill="#fff" stroke="rgba(0,0,0,.2)" />
+  <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-label="${r}${s}">
+    <rect x="3" y="3" width="194" height="294" rx="16" ry="16"
+          fill="#ffffff" stroke="rgba(0,0,0,.25)" />
     <!-- кути -->
-    <g fill="${col}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
-      <text x="18" y="32" font-size="28">${r}${suit}</text>
+    <g fill="${color}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
+      <text x="16" y="32" font-size="28">${r}${suitSymbol}</text>
       <g transform="rotate(180 100 150)">
-        <text x="18" y="32" font-size="28">${r}${suit}</text>
+        <text x="16" y="32" font-size="28">${r}${suitSymbol}</text>
       </g>
     </g>
     <!-- велика масть по центру -->
-    <text x="100" y="170" text-anchor="middle" fill="${col}"
-      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-      font-size="90" opacity=".9">${suit}</text>
+    <text x="100" y="172" text-anchor="middle" fill="${color}"
+          font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+          font-size="96" opacity=".9">${suitSymbol}</text>
   </svg>`;
 }
-
-function createCardEl(card, hidden=false){
-  const wrap = document.createElement('div');
-  wrap.className = 'pkr-card';
-  if (hidden) { wrap.classList.add('back'); return wrap; }
-  wrap.innerHTML = svgCard(card);
-  return wrap;
-}
-
-function renderCards(containerId, cards, {hidden=false} = {}) {
-  const root = document.getElementById(containerId);
-  if (!root) return;
-  root.innerHTML = '';
-  (cards||[]).forEach(c => root.appendChild(createCardEl(c, hidden)));
-}
-// ===== /Helpers =====
