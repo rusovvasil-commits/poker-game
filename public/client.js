@@ -1,59 +1,53 @@
-// --- socket & state ---
+/* ===== Socket & UI refs ===== */
 const socket = io();
-let myName = 'Player ' + Math.floor(Math.random() * 10000);
 let currentTable = null;
+let myName = 'Player ' + Math.floor(Math.random() * 10000);
 
-// --- DOM refs ---
-const vLobby  = document.getElementById('view-lobby');
-const vTable  = document.getElementById('view-table');
-const lobbyEl = document.getElementById('lobbyList');
-const boardEl = document.getElementById('board');
-const holeEl  = document.getElementById('hole');
+const vLobby   = document.getElementById('view-lobby');
+const vTable   = document.getElementById('view-table');
+const lobbyList = document.getElementById('lobbyList');
+const boardEl  = document.getElementById('board');
+const holeEl   = document.getElementById('hole');
 
-// --- buttons (як в index.html) ---
-document.getElementById('btnLobby').onclick = () => {
-  socket.emit('leave_table', { tableId: currentTable });
-  currentTable = null;
-  showLobby();
-  socket.emit('get_tables');
-};
-document.getElementById('btnNew').onclick   = () => socket.emit('new_hand');
-document.getElementById('btnFold').onclick  = () => socket.emit('action', { type: 'fold' });
-document.getElementById('btnCC').onclick    = () => socket.emit('action', { type: 'check_call' });
-document.getElementById('btnBet').onclick   = () => socket.emit('action', { type: 'bet', size: 10 });
-document.getElementById('btnHole').onclick  = () => socket.emit('get_hole');
+/* Кнопки */
+document.getElementById('btnLobby').onclick   = showLobby;
+document.getElementById('btnNew').onclick     = () => socket.emit('new_hand');
+document.getElementById('btnFold').onclick    = () => socket.emit('action', { type: 'fold' });
+document.getElementById('btnCC').onclick      = () => socket.emit('action', { type: 'check_call' });
+document.getElementById('btnBet').onclick     = () => socket.emit('action', { type: 'bet', amt: 10 });
+document.getElementById('btnHole').onclick    = () => socket.emit('get_hole');
 
-// --- helpers view ---
-function showLobby(){ vLobby.style.display='block'; vTable.style.display='none'; }
-function showTable(){ vLobby.style.display='none';  vTable.style.display='block'; }
+/* ===== Відмальовка повних карт (SVG) ===== */
+const SUIT_SYM = { c: '♣', d: '♦', h: '♥', s: '♠' };
+const SUIT_COL = s => (s === 'd' || s === 'h') ? '#cc1e2c' : '#1a1a1a';
 
-// ================= SVG картка =================
+/** svgCard({r:'A', s:'s'}) -> string */
 function svgCard({ r, s }) {
-  // s: 'c','d','h','s'  (♣ ♦ ♥ ♠)
-  const suitSymbol = { c:'♣', d:'♦', h:'♥', s:'♠' }[s];
-  const color = (s === 'd' || s === 'h') ? '#cc1e2c' : '#1a1a1a';
-  // Розмір під контейнер 80x120 (див. CSS .pkr-card)
+  const col = SUIT_COL(s);
+  const sym = SUIT_SYM[s] || '?';
+  // SVG під контейнер 80x120 (див. CSS .pkr-card svg{width:100%;height:100%})
   return `
-  <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-label="${r}${s}">
-    <rect x="3" y="3" width="194" height="294" rx="16" ry="16"
-          fill="#ffffff" stroke="rgba(0,0,0,.25)" />
-    <!-- кути -->
-    <g fill="${color}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
-      <text x="16" y="32" font-size="28">${r}</text>
-      <text x="32" y="32" font-size="28">${suitSymbol}</text>
-      <g transform="rotate(180 100 150)">
-        <text x="16" y="32" font-size="28">${r}</text>
-        <text x="32" y="32" font-size="28">${suitSymbol}</text>
-      </g>
-    </g>
-    <!-- велика масть по центру -->
-    <text x="100" y="172" text-anchor="middle" fill="${color}"
-      font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
-      font-size="96" opacity=".9">${suitSymbol}</text>
-  </svg>`;
+<svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" aria-label="${r}${s}">
+  <rect x="3" y="3" width="194" height="294" rx="16" ry="16"
+        fill="#ffffff" stroke="rgba(0,0,0,.25)" />
+  <!-- кут (ліворуч-верх) -->
+  <g fill="${col}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
+    <text x="16" y="32" font-size="28">${r}</text>
+    <text x="16" y="58" font-size="24">${sym}</text>
+  </g>
+  <!-- кут (праворуч-низ, повертаємо) -->
+  <g transform="rotate(180 170 270)" fill="${col}" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">
+    <text x="16" y="32" font-size="28">${r}</text>
+    <text x="16" y="58" font-size="24">${sym}</text>
+  </g>
+  <!-- велика масть по центру -->
+  <text x="100" y="172" text-anchor="middle" fill="${col}"
+        font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial"
+        font-size="96" opacity=".09">${sym}</text>
+</svg>`;
 }
 
-function createCardEl(card, hidden=false) {
+function createCardEl(card, hidden = false) {
   const wrap = document.createElement('div');
   wrap.className = 'pkr-card';
   if (hidden) wrap.classList.add('back');
@@ -61,62 +55,79 @@ function createCardEl(card, hidden=false) {
   return wrap;
 }
 
-function renderCards(containerId, cards, { hidden=false } = {}) {
+function renderCards(containerId, cards, { hidden = false } = {}) {
   const root = document.getElementById(containerId);
   if (!root) return;
   root.innerHTML = '';
   (cards || []).forEach(c => root.appendChild(createCardEl(c, hidden)));
 }
 
-// =============== ЛОБІ ===============
-function renderLobby(tables = []) {
-  lobbyEl.innerHTML = '';
-  if (!tables.length) {
-    lobbyEl.innerHTML = '<div class="lobby__row">Столів поки немає…</div>';
-    return;
-  }
-  tables.forEach(t => {
-    const row = document.createElement('div');
-    row.className = 'lobby__row';
-    row.innerHTML = `
-      <div>${t.name} — ${t.players}/${t.max} — ${t.stage || 'waiting'}</div>
-      <button class="btn">Зайти</button>
-    `;
-    row.querySelector('button').onclick = () => {
+/* ===== Лобі / Стіл ===== */
+function showLobby() {
+  vTable.style.display = 'none';
+  vLobby.style.display = 'block';
+  socket.emit('get_lobby');
+}
+
+/* побудова списку столів у лобі */
+function renderLobby(list = []) {
+  lobbyList.innerHTML = '';
+  list.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'row';
+    item.innerHTML = `
+      <div>3-max BB10 — ${t.players}/3 — ${t.stage || 'waiting'}</div>
+      <button class="btn">Зайти</button>`;
+    item.querySelector('button').onclick = () => {
       socket.emit('join_table', { tableId: t.id, name: myName });
     };
-    lobbyEl.appendChild(row);
+    lobbyList.appendChild(item);
   });
 }
 
-// =============== SOCKET EVENTS ===============
-socket.on('connect', () => {
-  // запитуємо лобі при підключенні
-  socket.emit('get_tables');
+/* перемикач у вигляд столу */
+function showTable() {
+  vLobby.style.display = 'none';
+  vTable.style.display = 'block';
+}
+
+/* приймаємо стан столу від сервера */
+function applyTableState(state = {}) {
+  // Борд
+  renderCards('board', state.board || [], { hidden: false });
+  // Мої карти якщо прислали в стані
+  if (state.hole && state.hole.length) {
+    renderCards('hole', state.hole, { hidden: false });
+  }
+}
+
+/* окреме повідомлення з моїми картами */
+socket.on('hole', cards => {
+  renderCards('hole', cards, { hidden: false });
+});
+
+/* коли прийшов стан столу */
+socket.on('table_state', state => {
+  currentTable = state.tableId;
+  showTable();
+  applyTableState(state);
+});
+
+/* оновлення лобі */
+socket.on('lobby', data => {
+  renderLobby(data.tables || []);
+});
+
+/* якщо сервер каже, що ти вийшов зі столу */
+socket.on('left_table', () => {
+  currentTable = null;
   showLobby();
 });
 
-// сервер надсилає список столів
-socket.on('tables', (tables) => renderLobby(tables));
+/* на старті показуємо лобі */
+showLobby();
 
-// сервер підтвердив вхід за стіл
-socket.on('table_joined', (payload) => {
-  currentTable = payload.tableId;
-  showTable();
-  // одразу оновимо борд/карти, якщо сервер надіслав стан
-  if (payload.board)  renderCards('board', payload.board);
-  if (payload.hole)   renderCards('hole',  payload.hole);
+/* на всяк випадок: якщо вкладку закривають — просимо залишити стіл */
+window.addEventListener('beforeunload', () => {
+  if (currentTable) socket.emit('leave_table', { tableId: currentTable });
 });
-
-// оновлення борду (community)
-socket.on('board', (cards) => renderCards('board', cards));
-
-// оновлення моєї руки
-socket.on('hole', (cards) => renderCards('hole', cards));
-
-// коли хтось лівнув / стіл змінився — оновити лобі
-socket.on('tables_update', (tables) => renderLobby(tables));
-
-// опціонально: повідомлення/помилки
-socket.on('message', (m) => console.log('[msg]', m));
-socket.on('error',   (e) => console.warn('[err]', e));
