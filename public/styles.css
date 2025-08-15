@@ -1,13 +1,63 @@
-body{ margin:0; background:#0f1116; color:#e3e7ee; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; }
-h1,h2{ margin:16px; }
-.btn{ background:#1f2636; color:#9ec3ff; border:1px solid #2b3550; border-radius:8px; padding:8px 12px; cursor:pointer; }
-.lobbyList{ max-width:900px; margin:16px auto; display:flex; flex-direction:column; gap:10px; }
-.row{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#151a22; border:1px solid #242b3a; border-radius:10px; }
+:root{
+  --bg:#0f1116; --panel:#151a22; --accent:#2b3550; --text:#e3e7ee;
+  --muted:#9aa7bd; --ok:#2bc48a; --bad:#e05264;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
 
-#view-table{ max-width:1100px; margin:0 auto; padding:10px; }
-.board{ display:flex; gap:10px; justify-content:center; margin:16px 0; }
-.my-cards{ display:flex; gap:10px; justify-content:center; }
+/* Topbar */
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:12px 16px; background:#0b0e13; border-bottom:1px solid #1e2636}
+.brand{font-weight:800; letter-spacing:.5px}
+.wallet{color:var(--muted); font-size:14px}
 
-.pkr-card{ width:80px; height:120px; border-radius:10px; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,.15); display:flex; }
-.pkr-card svg{ width:100%; height:100%; display:block; }
-.pkr-card.back{ background:linear-gradient(135deg,#173b73,#2e5aa7); border:1px solid rgba(255,255,255,.15); }
+/* Tabs */
+.nav{display:flex; gap:8px}
+.tab-btn{background:#141a22; color:#cfe0ff; border:1px solid #23304a; border-radius:8px; padding:8px 12px; cursor:pointer}
+.tab-btn.active{background:#1e2940; border-color:#33508a}
+
+.container{max-width:1200px; margin:16px auto; padding:0 12px}
+.panel{background:var(--panel); border:1px solid var(--accent); border-radius:12px; padding:16px; margin-bottom:16px}
+.panel__header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.btn{background:#1f2636; color:#e3e7ee; border:1px solid var(--accent); border-radius:10px; padding:8px 14px; cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.danger{background:#3c1820; border-color:#7c2b3a}
+
+.tab{display:none}
+.tab.active{display:block}
+
+/* Lobby */
+.lobby-list{display:flex; flex-direction:column; gap:10px}
+.lobby-row{display:flex; justify-content:space-between; align-items:center; padding:12px; background:#141a22; border:1px solid #23304a; border-radius:10px}
+.lobby-row .meta{color:var(--muted)}
+
+/* Table */
+.table{display:flex; flex-direction:column; gap:12px; align-items:center}
+.controls{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+
+/* Cards */
+.pkr-cards{display:flex; gap:12px; align-items:center; justify-content:center; margin:12px 0}
+.pkr-card{width:90px; height:130px; border-radius:12px; background:#fff;
+  box-shadow:0 6px 14px rgba(0,0,0,.28); display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(0,0,0,.22)}
+.pkr-card.hidden{background:linear-gradient(135deg,#1f3b73,#2e5aa7); border:1px solid rgba(255,255,255,.18)}
+.pkr-card svg{width:96%; height:96%}
+
+@media (max-width:640px){
+  .pkr-card{width:74px; height:110px}
+}
+
+/* Shop */
+.shop{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.shop-card{background:#121724; border:1px solid #22324d; border-radius:12px; padding:14px}
+.shop-card h3{margin:0 0 10px}
+.shop-card label{display:block; color:var(--muted); font-size:14px; margin-bottom:6px}
+.shop-card input{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #21314b; background:#0f1522; color:#e3e7ee; margin-bottom:10px}
+.hint{color:var(--muted); font-size:13px; margin:4px 0 0}
+
+/* Support */
+.support{display:flex; flex-direction:column; gap:10px}
+.support textarea{width:100%; padding:10px 12px; border-radius:10px; border:1px solid #21314b; background:#0f1522; color:#e3e7ee}
+.support .row{display:flex; gap:10px; align-items:center}
+.support input{flex:1; padding:10px 12px; border-radius:10px; border:1px solid #21314b; background:#0f1522; color:#e3e7ee}
