@@ -1,22 +1,97 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <title>Poker Fishka</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Poker Fishka</title>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-    <h1>Лобі — столи</h1>
-    <div id="view-lobby"></div>
-    <div id="view-table" style="display:none;"></div>
+  <header class="topbar">
+    <div class="brand">POKER FISHKA</div>
+    <nav class="nav">
+      <button class="tab-btn active" data-tab="tables">Столи</button>
+      <button class="tab-btn" data-tab="shop">Магазин</button>
+      <button class="tab-btn" data-tab="support">Техпідтримка</button>
+    </nav>
+    <div class="wallet">Баланс: <span id="balance">0</span> фішок</div>
+  </header>
 
-    <button id="btnLobby">Лобі</button>
-    <button id="btnNew">Нова роздача</button>
-    <button id="btnFold">Скинути карти</button>
-    <button id="btnCheckCall">Чек / Колл</button>
-    <button id="btnBet">Ставка</button>
+  <main class="container">
+    <!-- TAB: СТОЛИ -->
+    <section id="tab-tables" class="tab active">
+      <!-- Лобі -->
+      <div id="view-lobby" class="panel">
+        <div class="panel__header">
+          <h2>Лобі — столи</h2>
+          <button class="btn" id="btnRefresh">Оновити</button>
+        </div>
+        <div id="lobbyList" class="lobby-list">Завантаження…</div>
+      </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="client.js"></script>
+      <!-- Стіл -->
+      <div id="view-table" class="panel" style="display:none;">
+        <div class="panel__header">
+          <h2>Ігровий стіл</h2>
+          <button class="btn" id="btnLeave">До лобі</button>
+        </div>
+
+        <div class="table">
+          <div id="board" class="pkr-cards"></div>
+          <div id="hole" class="pkr-cards"></div>
+
+          <div class="controls">
+            <button id="btnNew"  class="btn">Нова роздача</button>
+            <button id="btnFold" class="btn">Fold</button>
+            <button id="btnCC"   class="btn">Check/Call</button>
+            <button id="btnBet"  class="btn">Bet +10</button>
+            <button id="btnHole" class="btn">Мої карти</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: МАГАЗИН -->
+    <section id="tab-shop" class="tab">
+      <div class="panel">
+        <div class="panel__header"><h2>Магазин фішок</h2></div>
+        <div class="shop">
+          <div class="shop-card">
+            <h3>Купити фішки</h3>
+            <label>Кількість</label>
+            <input id="buyAmount" type="number" min="1" step="1" value="100" />
+            <button class="btn" id="btnBuy">Купити</button>
+            <p class="hint">Бек повинен обробляти подію <code>shop:buy</code>.</p>
+          </div>
+          <div class="shop-card">
+            <h3>Продати фішки</h3>
+            <label>Кількість</label>
+            <input id="sellAmount" type="number" min="1" step="1" value="100" />
+            <button class="btn danger" id="btnSell">Продати</button>
+            <p class="hint">Бек повинен обробляти подію <code>shop:sell</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: ТЕХПІДТРИМКА -->
+    <section id="tab-support" class="tab">
+      <div class="panel">
+        <div class="panel__header"><h2>Техпідтримка</h2></div>
+        <form id="supportForm" class="support">
+          <label>Ваше повідомлення</label>
+          <textarea id="supportText" rows="5" placeholder="Опишіть проблему..."></textarea>
+          <div class="row">
+            <input id="supportEmail" type="email" placeholder="Email для відповіді (необов’язково)" />
+            <button class="btn" id="btnSupport">Надіслати</button>
+          </div>
+          <p class="hint">Подія для бека: <code>support:ticket</code>.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/client.js"></script>
 </body>
 </html>
